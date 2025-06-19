@@ -1,0 +1,38 @@
+name: Deploy Infra to Azure Dev
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - '.github/workflows/deploy-dev.yml'
+
+env:
+  AZURE_LOCATION: 'eastus'
+  PARAM_FILE: 'infra/parameters/dev.json'
+
+jobs:
+  deploy:
+    name: Deploy Bicep to Dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_DEV }}
+
+      - name: Deploy Bicep template
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+
+            az deployment sub create \
+              --location ${{ env.AZURE_LOCATION }} \
+              --template-file infra/main.bicep \
+              --parameters @$PARAM_FILE
