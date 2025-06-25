@@ -44,7 +44,7 @@ jobs:
         run: |
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-          az deployment group create \
+          az deployment group what-if \
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
             --template-file infra/modules/core/main.bicep \
             --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
