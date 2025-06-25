@@ -1,33 +1,35 @@
 # resume-screening
 
+https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/basic-azure-ai-foundry-chat
+
 ## project structure
 ```bash
-└── 📁resume-screening
-    └── 📁app
-        └── 📁backend
-            └── 📁api
+└── resume-screening
+    └── app
+        └── backend
+            └── api
                 └── endpoint.py
                 └── main.py
                 └── middleware.py
                 └── router.py
-            └── 📁common
+            └── common
                 └── config.py
                 └── logger.py
                 └── utils.py
-            └── 📁core
-        └── 📁frontend
+            └── core
+        └── frontend
             └── main.py
-    └── 📁config
+    └── config
         └── config.yml
         └── dev.env
         └── prod.env
         └── template.env
         └── test.env
-    └── 📁infra
+    └── infra
         └── core.bicep
         └── dev.json
-    └── 📁logs
-    └── 📁tests
+    └── logs
+    └── tests
     └── .gitignore
     └── Dockerfile
     └── LICENSE

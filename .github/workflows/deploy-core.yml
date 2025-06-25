@@ -1,0 +1,48 @@
+name: Deploy Core Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy core module to Azure
+    runs-on: ubuntu-latest
+
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set variables
+        id: vars
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          echo "ENVIRONMENT=$ENV" >> $GITHUB_OUTPUT
+          echo "RESOURCE_GROUP=rg-core-$ENV" >> $GITHUB_OUTPUT
+          echo "PARAMS_FILE=infra/modules/core/core.$ENV.bicepparam" >> $GITHUB_OUTPUT
+
+      - name: Deploy core Bicep module
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+            az deployment group create \
+              --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
+              --template-file infra/modules/core/main.bicep \
+              --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
