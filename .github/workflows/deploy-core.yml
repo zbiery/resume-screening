@@ -36,6 +36,10 @@ jobs:
           echo "RESOURCE_GROUP=rg-core-$ENV" >> $GITHUB_OUTPUT
           echo "PARAMS_FILE=infra/modules/core/core.$ENV.bicepparam" >> $GITHUB_OUTPUT
 
+      - name: Upgrade Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
       - name: Deploy core Bicep module
         run: |
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -44,7 +48,7 @@ jobs:
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
             --template-file infra/modules/core/main.bicep \
             --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
-            
+
         # uses: azure/cli@v1
         # with:
         #   inlineScript: |
