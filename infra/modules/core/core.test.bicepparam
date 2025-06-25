@@ -13,7 +13,7 @@ param logAnalyticsName  = 'log-core-test-01'
 param appInsightsName = 'appi-core-test-01'
 
 @description('Name of the Storage Account')
-param storageAccountName = 'stor-${uniqueString('test-core')}-01'
+param storageAccountName = toLower('stor${uniqueString('core')}test')
 
 @description('Name of the Blob container for uploaded files')
 param containerName = 'container-uploads-core-test-01'
