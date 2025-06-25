@@ -1,62 +1,45 @@
-param env string
-param location string
-param vnetAddressPrefix string 
-param appSubnetPrefix string 
+@description('Name of the Virtual Network')
+param vnetName string
+
+@description('Location for all resources')
+param location string = resourceGroup().location
+
+@description('Address space for the Virtual Network')
+param vnetAddressPrefix string
+
+@description('Address prefix for the app subnet')
+param appSubnetPrefix string
+
+@description('Address prefix for the private endpoints subnet')
 param privateEndpointSubnetPrefix string 
 
-var vnetName = 'vnet-${env}-01'
-var subnetAppName = 'snet-app-${env}-01'
-var subnetPeName = 'snet-pe-${env}-01'
-var nsgAppName = 'nsg-app-${env}-01'
-var nsgPeName = 'nsg-pe-${env}-01'
-
-resource nsgApp 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: nsgAppName
-  location: location
-  properties: {}
-}
-
-resource nsgPe 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: nsgPeName
-  location: location
-  properties: {}
-}
-
-resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: vnetName
   location: location
   properties: {
     addressSpace: {
-      addressPrefixes: [ vnetAddressPrefix ]
+      addressPrefixes: [
+        vnetAddressPrefix
+      ]
     }
     subnets: [
       {
-        name: subnetAppName
+        name: 'appSubnet'
         properties: {
           addressPrefix: appSubnetPrefix
-          delegations: [
-            {
-              name: 'appsvc-delegation'
-              properties: {
-                serviceName: 'Microsoft.Web/serverFarms'
-              }
-            }
-          ]
-          networkSecurityGroup: {
-            id: nsgApp.id
-          }
         }
       }
       {
-        name: subnetPeName
+        name: 'privateEndpointSubnet'
         properties: {
           addressPrefix: privateEndpointSubnetPrefix
-          privateEndpointNetworkPolicies: 'Disabled'
-          networkSecurityGroup: {
-            id: nsgPe.id
-          }
+          privateEndpointNetworkPolicies: 'Disabled'  // Required for private endpoints
         }
       }
     ]
   }
 }
+
+output vnetId string = vnet.id
+output appSubnetId string = '${vnet.id}/subnets/appSubnet'
+output privateEndpointSubnetId string = '${vnet.id}/subnets/privateEndpointSubnet'
