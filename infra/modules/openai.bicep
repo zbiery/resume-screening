@@ -39,7 +39,7 @@ var dnsZoneName = 'privatelink.openai.azure.com'
 
 // Azure OpenAI resource
 resource openAiService 'Microsoft.CognitiveServices/accounts@2023-10-01-preview' = {
-  name: '${environmentName}-openai'
+  name: '${environmentName}-openai-${uniqueString(resourceGroup().id)}'
   location: location
   tags: tags
   kind: 'OpenAI'
