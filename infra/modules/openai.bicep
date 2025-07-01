@@ -37,9 +37,12 @@ param modelDeployments array = [
 
 var dnsZoneName = 'privatelink.openai.azure.com'
 
+var deploymentSuffix = uniqueString(resourceGroup().id, environment().name)
+var openAiResourceName = '${environmentName}-openai-${deploymentSuffix}'
+
 // Azure OpenAI resource
 resource openAiService 'Microsoft.CognitiveServices/accounts@2023-10-01-preview' = {
-  name: '${environmentName}-openai-${uniqueString(resourceGroup().id)}'
+  name: openAiResourceName
   location: location
   tags: tags
   kind: 'OpenAI'
@@ -47,7 +50,7 @@ resource openAiService 'Microsoft.CognitiveServices/accounts@2023-10-01-preview'
     name: openAiServiceSku
   }
   properties: {
-    customSubDomainName: '${environmentName}-openai-${uniqueString(resourceGroup().id)}'
+    customSubDomainName: openAiResourceName
     publicNetworkAccess: 'Disabled'
     networkAcls: {
       defaultAction: 'Deny'
