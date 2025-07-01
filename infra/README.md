@@ -1,68 +1,179 @@
-# structure
+# AI Resume Screening App - Azure Infrastructure
+
+This folder contains the Azure Bicep templates for deploying the **AI Resume Screening application** on Azure across multiple environments (dev, test, prod).
+
+---
+
+## Prerequisites
+
+Before doing anything, ensure the following:
+
+- An **active Azure account**
+- **Visual Studio Code** with the Bicep extension
+- **Azure CLI** installed: [Install Link](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+- Contributor or Owner role in each subscription
+- Admin permission to create Azure AD service principals (for GitHub deployer)
+
+---
+
+## Project Structure
+
+```bash
+infra/
+├── main.bicep                   # Main orchestration template
+├── main.dev.bicepparam          # Parameters for development
+├── main.test.bicepparam         # Parameters for test
+├── main.prod.bicepparam         # Parameters for production
+├── modules/
+│   ├── identity.bicep           # User-assigned identity
+│   ├── networking.bicep         # VNet, subnets, NSGs, private DNS
+│   ├── monitoring.bicep         # Log Analytics and App Insights
+│   ├── keyvault.bicep           # Key Vault and private endpoint
+│   ├── storage.bicep            # Blob storage and private endpoint
+│   ├── acr.bicep                # Azure Container Registry
+│   ├── openai.bicep             # Azure OpenAI service
+│   └── containerapp.bicep       # Container App with private networking
+└── README.md                    # Documentation and instructions
 ```
-infra
-├── main.bicep                   # Orchestrator module, calls all resource modules
-├── parameters
-│   ├── dev.parameters.json      # Parameter values for dev environment
-│   ├── test.parameters.json     # Parameter values for test environment
-│   └── prod.parameters.json     # Parameter values for prod environment
-├── modules
-│   ├── resourceGroup.bicep      # Creates the resource group
-│   ├── network.bicep            # Creates VNet and subnets
-│   ├── storage.bicep            # Creates Storage Account for blobs, logs, etc.
-│   ├── cosmosdb.bicep           # Creates Cosmos DB (or SQL DB) for data storage
-│   ├── openai.bicep             # Deploys Azure OpenAI service
-│   ├── keyvault.bicep           # Creates Key Vault and access policies
-│   ├── containerRegistry.bicep  # Creates Azure Container Registry for Docker images
-│   ├── containerAppsEnv.bicep   # Creates Container Apps Environment (infrastructure for container apps)
-│   ├── containerApps.bicep      # Deploys Container Apps (API and UI containers)
-│   └── apiManagement.bicep      # Creates API Management service for API gateway
-└── README.md                    # Documentation and instructions for infra deployment
-```
 
-before doing anything you must have an active azure account
+## Environments
+The infrastructure supports three separate environments:
+1. dev
+2. test
+3. prod
 
-VSCode
-AzureCLI
+#### Development
+- Uses Standard SKUs where possible
+- Single instance deployments
+- Basic monitoring retention
 
-project is set up for 3 different environments -- these are managed at the subscription level
-make your subscriptions for dev, test, and prod within the [azure portal](https://www.portal.azure.com)
+#### Production
+- Consider Premium SKUs for better performance
+- Enable zone redundancy
+- Increase retention periods for compliance
 
-once subs are created, login to the azure portal and choose the subscription you wish to work with
+Each environment is managed at the subscription level. You must create separate subscriptions in the Azure Portal and link your deployments to the appropriate one. Deployments are handled through GitHub Actions using environment specific deployers (service principals). You must set up a service principal for each subscription (dev, test, prod).
+
+### Service Principal Setup (One-Time)
+1. Login to Azure:
 ```bash
 az login
 ```
-
-save your sub id as an environment secret in your github repo
-
-before deploying any resources, we must do 2 things:
-1. create our resource groups at the subscription level
-2. create our service principal for our deployer (github actions)
-
-Run this to create the resource groups within your active subscription. Do not forget to alter the parameters file to point at the correct biccepparam file for your environment depending on your subscription. Additionally, you may optionally change the location.
-
+2. Set active subscription:
 ```bash
-az deployment sub create \
-  --location <location> \
-  --template-file infra/modules/resourceGroups/main.bicep \
-  --parameters infra/modules/resourceGroups/resourceGroups.<env>.bicepparam
+az account set --subscription "<subscription-id>"
 ```
-
-Create a service principal (deployer) for each environment
+3. Create a Service Principal for GitHub Actions per environment:
 ```bash
 az ad sp create-for-rbac --name "github-deployer-<env>" \
   --role "Contributor" \
   --scopes /subscriptions/<subscription-id> \
   --sdk-auth
 ```
+4. Save the generated JSON as a GitHub Actions secret along with the subscription ID
+```
+Name: AZURE_CREDENTIALS
+Value: {
+  "clientId": "XXX",
+  "clientSecret": "XXX",
+  "subscriptionId": "XXX",
+  "tenantId": "XXX",
+  "activeDirectoryEndpointUrl": "XXX",
+  "resourceManagerEndpointUrl": "XXX",
+  "activeDirectoryGraphResourceId": "XXX",
+  "sqlManagementEndpointUrl": "XXX",
+  "galleryEndpointUrl": "XXX",
+  "managementEndpointUrl": "XXX"
+}
+Scope: Environment-level secret (dev, test, prod)
 
-to deploy resources run the appropriate workflow for your environment
+Name: AZURE_SUBSCRIPTION_ID
+Value: xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx
+Scope: Environment-level secret (dev, test, prod)
+```
 
-it should be in order of 
-1. core
-2. networking
-3. openai
-4. containerApp
-5. 
+## Deployment Steps
+1. Create a resource group for your environment:
+```bash
+az group create --name "<resource-group-name>" --location "<azure-region>"
+```
+2. Deploy Bicep with the matching parameter file:
+```bash
+az deployment group create \
+  --resource-group <resource-group-name> \
+  --template-file main.bicep \
+  --parameters @main.dev.bicepparam
+```
+⚠️ Replace main.dev.bicepparam with main.test.bicepparam or main.prod.bicepparam depending on the environment.
+
+### What Gets Deployed
+
+| Module       | Description                                              |
+|--------------|----------------------------------------------------------|
+| `identity`   | User-assigned managed identity                           |
+| `networking` | VNet, subnets, NSGs, and private DNS zones               |
+| `monitoring` | Log Analytics workspace and Application Insights         |
+| `keyvault`   | Key Vault with private endpoint and RBAC                 |
+| `storage`    | Blob storage account with private endpoint               |
+| `acr`        | Azure Container Registry (private, optional)             |
+| `openai`     | Azure OpenAI instance and model deployments              |
+| `containerapp` | Hosts the application in a secure, scalable app       |
+
+## Networking and Security
+- No public exposure: All services are accessed via private endpoints
+- User-assigned identity: Used to access all key services (OpenAI, ACR, KV, Storage)
+- Private DNS Zones: For internal name resolution (e.g., privatelink.openai.azure.com)
+- NSGs: Lock down subnets by function
+
+### Subnets
+| Subnet Name            | CIDR        | Purpose                        |
+| ---------------------- | ----------- | ------------------------------ |
+| `container-app-subnet` | 10.0.1.0/24 | Azure Container Apps           |
+| `storage-subnet`       | 10.0.2.0/24 | Azure Storage private endpoint |
+| `keyvault-subnet`      | 10.0.3.0/24 | Key Vault private endpoint     |
+| `openai-subnet`        | 10.0.4.0/24 | Azure OpenAI private endpoint  |
+| `acr-subnet`           | 10.0.5.0/24 | ACR (Azure Container Registry) |
 
 
+### Private DNS Zones
+| DNS Zone                                    | Associated Service                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| `privatelink.vaultcore.azure.net`           | Azure Key Vault                                                              |
+| `privatelink.openai.azure.com`              | Azure OpenAI                                                                 |
+| `privatelink.azurecr.io`                    | Azure Container Registry                                                     |
+| `privatelink.blob.core.windows.net`         | Azure Blob Storage                                                           |
+| `privatelink.monitor.azure.com`             | Azure Monitor / App Insights (optional, only needed for full private access) |
+
+## Tips
+- Subnet CIDR ranges must not overlap across environments
+- Use `main.<env>.bicepparam` to manage environment differences
+- Keep secrets and credentials in GitHub **environment-level** secrets
+
+## Contributing
+1. Clone the repo
+2. Create a feature branch
+3. Make changes and test with the appropriate .bicepparam
+4. Submit a pull request with a clear description
+
+### Useful Commands
+
+```bash
+# Check deployment status
+az deployment group show -g myapp-rg -n main
+
+# View container app logs
+az containerapp logs show -g myapp-rg -n myapp-dev-ca
+
+# Test private endpoint connectivity
+az network private-endpoint-connection list -g myapp-rg
+
+# Get Key Vault secrets (requires permissions)
+az keyvault secret list --vault-name myapp-dev-kv-xxxxx
+```
+
+## Cleanup
+To remove resources from your subscription:
+
+```bash
+az group delete --name <resource-group-name> --yes --no-wait
+```

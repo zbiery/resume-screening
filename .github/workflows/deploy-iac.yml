@@ -1,4 +1,4 @@
-name: Deploy Core Infrastructure
+name: Deploy Full Infrastructure
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy core module to Azure
+    name: Deploy infrastructure to Azure
     runs-on: ubuntu-latest
 
     environment: ${{ inputs.environment }}
@@ -28,33 +28,31 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Set variables
+      - name: Set environment variables
         id: vars
         run: |
           ENV="${{ github.event.inputs.environment }}"
           echo "ENVIRONMENT=$ENV" >> $GITHUB_OUTPUT
-          echo "RESOURCE_GROUP=rg-core-$ENV" >> $GITHUB_OUTPUT
-          echo "PARAMS_FILE=infra/modules/core/core.$ENV.bicepparam" >> $GITHUB_OUTPUT
+          echo "RESOURCE_GROUP=rg-resumescreener-$ENV" >> $GITHUB_OUTPUT
+          echo "PARAMS_FILE=infra/main.$ENV.bicepparam" >> $GITHUB_OUTPUT
 
-      - name: Upgrade Azure CLI
+      - name: Ensure Azure CLI is up-to-date
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: Deploy core Bicep module
+      - name: Run Bicep What-If Deployment
         run: |
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           az deployment group what-if \
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
-            --template-file infra/modules/core/main.bicep \
-            --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
+            --template-file infra/main.bicep \
+            --parameters @$${{ steps.vars.outputs.PARAMS_FILE }}
 
-        # uses: azure/cli@v1
-        # with:
-        #   inlineScript: |
-        #     az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-        #     az deployment group create \
-        #       --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
-        #       --template-file infra/modules/core/main.bicep \
-        #       --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
+      # Uncomment to actually deploy
+      # - name: 🔧 Deploy Infrastructure
+      #   run: |
+      #     az deployment group create \
+      #       --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
+      #       --template-file infra/main.bicep \
+      #       --parameters @$${{ steps.vars.outputs.PARAMS_FILE }}
