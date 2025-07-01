@@ -128,7 +128,7 @@ resource containerAppSubnetNsgAssociation 'Microsoft.Network/virtualNetworks/sub
 output vnetId string = vnet.id
 output vnetName string = vnet.name
 output containerAppSubnetId string = '${vnet.id}/subnets/${environmentName}-container-app-subnet'
-output storageSubnetId string = '${vnet.id}/subnets/${environmentName}-private-endpoints-subnet'
+output storageSubnetId string = '${vnet.id}/subnets/${environmentName}-storage-subnet'
 output keyVaultSubnetId string = '${vnet.id}/subnets/${environmentName}-keyvault-subnet'
 output openAiSubnetId string = '${vnet.id}/subnets/${environmentName}-openai-subnet'
 output acrSubnetId string = '${vnet.id}/subnets/${environmentName}-acr-subnet'
