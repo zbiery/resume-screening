@@ -33,7 +33,7 @@ jobs:
         run: |
           ENV="${{ github.event.inputs.environment }}"
           echo "ENVIRONMENT=$ENV" >> $GITHUB_OUTPUT
-          echo "RESOURCE_GROUP=rg-resumescreener-$ENV" >> $GITHUB_OUTPUT
+          echo "RESOURCE_GROUP=rg-resume-screener-$ENV" >> $GITHUB_OUTPUT
           echo "PARAMS_FILE=infra/main.$ENV.bicepparam" >> $GITHUB_OUTPUT
 
       - name: Ensure Azure CLI is up-to-date
