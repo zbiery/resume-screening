@@ -40,19 +40,20 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: Run Bicep What-If Deployment
-        run: |
-          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # # Test deployment
+      # - name: Run Bicep What-If Deployment
+      #   run: |
+      #     az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-          az deployment group what-if \
+      #     az deployment group what-if \
+      #       --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
+      #       --template-file infra/main.bicep \
+      #       --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
+
+      # Uncomment to actually deploy
+      - name: Deploy Infrastructure
+        run: |
+          az deployment group create \
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
             --template-file infra/main.bicep \
             --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
-
-      # Uncomment to actually deploy
-      # - name: 🔧 Deploy Infrastructure
-      #   run: |
-      #     az deployment group create \
-      #       --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
-      #       --template-file infra/main.bicep \
-      #       --parameters @$${{ steps.vars.outputs.PARAMS_FILE }}
