@@ -47,7 +47,7 @@ resource openAiService 'Microsoft.CognitiveServices/accounts@2023-10-01-preview'
     name: openAiServiceSku
   }
   properties: {
-    customSubDomainName: '${environmentName}-openai'
+    customSubDomainName: '${environmentName}-openai-${uniqueString(resourceGroup().id)}'
     publicNetworkAccess: 'Disabled'
     networkAcls: {
       defaultAction: 'Deny'
