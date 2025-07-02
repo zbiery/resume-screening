@@ -36,6 +36,7 @@ param modelDeployments array = [
 ]
 
 var dnsZoneName = 'privatelink.openai.azure.com'
+var cognitiveServicesAIUserRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
 
 var deploymentSuffix = uniqueString(resourceGroup().id, environment().name)
 var openAiResourceName = '${environmentName}-openai-${deploymentSuffix}'
@@ -88,7 +89,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-prev
   name: guid(userAssignedIdentity.id, openAiService.id, 'openai-user-role')
   scope: openAiService
   properties: {
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: cognitiveServicesAIUserRole
     principalId: userAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }

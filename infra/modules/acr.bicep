@@ -14,6 +14,7 @@ param subnetId string
 param userAssignedIdentityName string
 
 var dnsZoneName = 'privatelink.azurecr.io'
+var acrPullRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d') // AcrPull
 
 // Private DNS Zone for ACR
 resource acrPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
@@ -90,7 +91,7 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   scope: containerRegistry
   name: guid(containerRegistry.id, userAssignedIdentity.id, 'acr-pull-role')
   properties: {
-    roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+    roleDefinitionId: acrPullRole
     principalId: userAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }

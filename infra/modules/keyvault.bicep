@@ -18,8 +18,11 @@ param virtualNetworkId string
 
 // Key Vault name must be globally unique, let's generate
 var keyVaultName = toLower('${environmentName}kv${uniqueString(resourceGroup().id)}')
-
 var dnsZoneName = 'privatelink.vaultcore.azure.net'
+
+// Built-in role definition IDs (these are the same across all Azure subscriptions)
+var keyVaultContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7')
+var keyVaultSecretsUserRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
 
 // Reference existing UMI
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
@@ -43,18 +46,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enabledForDiskEncryption: false
     enablePurgeProtection: true
     enableSoftDelete: true
-    // networkAcls: {
-    //   bypass: 'AzureServices'
-    //   defaultAction: 'Deny'
-    //   virtualNetworkRules: [
-    //     {
-    //       id: privateEndpointSubnetId
-    //     }
-    //   ]
-    //   ipRules: []
-    // }
+    enableRbacAuthorization: true // This is important for RBAC
   }
-  dependsOn: []
 }
 
 // Private Endpoint for Key Vault
@@ -118,31 +111,23 @@ resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/private
 
 // RBAC role assignments for the UMI on the Key Vault
 resource keyVaultContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.id, userAssignedIdentity.id, 'keyvault-contributor-role')
+  name: guid(keyVault.id, userAssignedIdentity.id, keyVaultContributorRoleId)
   scope: keyVault
   properties: {
-    roleDefinitionId: 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7' // Key Vault Contributor
+    roleDefinitionId: keyVaultContributorRoleId
     principalId: userAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
-  dependsOn: [
-    keyVault
-    userAssignedIdentity
-  ]
 }
 
 resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.id, userAssignedIdentity.id, 'keyvault-secrets-user-role')
+  name: guid(keyVault.id, userAssignedIdentity.id, keyVaultSecretsUserRoleId)
   scope: keyVault
   properties: {
-    roleDefinitionId: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+    roleDefinitionId: keyVaultSecretsUserRoleId
     principalId: userAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
-  dependsOn: [
-    keyVault
-    userAssignedIdentity
-  ]
 }
 
 output keyVaultId string = keyVault.id

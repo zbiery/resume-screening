@@ -23,6 +23,7 @@ param subnetId string
 param userAssignedIdentityName string
 
 var dnsZoneName string = 'privatelink.blob.core.windows.net'
+var storageBlobDataContributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe') // Storage Blob Data Contributor
 
 // Storage account (no system assigned identity)
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
@@ -142,7 +143,7 @@ resource blobDataContributorRole 'Microsoft.Authorization/roleAssignments@2022-0
   name: guid(storageAccount.id, userAssignedIdentity.id, 'StorageBlobDataContributor')
   scope: storageAccount
   properties: {
-    roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    roleDefinitionId: storageBlobDataContributorRole
     principalId: userAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
