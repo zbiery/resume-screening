@@ -46,6 +46,9 @@ param logAnalyticsRetentionDays int = 30
 @description('Log Analytics SKU')
 param logAnalyticsSku string = 'PerGB2018'
 
+@description('Log Analytics Workspace name')
+param logAnalyticsWorkspaceName string = '${environmentName}-law'
+
 @description('Virtual network address space')
 param vnetAddressSpace string = '10.0.0.0/16'
 
@@ -228,7 +231,7 @@ module containerApp 'modules/containerapp.bicep' = {
     environmentName: environmentName
     location: location
     tags: tags
-    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     applicationInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
     userAssignedIdentityName: identity.outputs.userAssignedIdentityName
     keyVaultUri: 'https://${keyVault.outputs.keyVaultName}.vault.azure.net/'

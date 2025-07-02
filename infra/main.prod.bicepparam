@@ -11,6 +11,7 @@ param storageAccountTier = 'Hot'
 
 param logAnalyticsRetentionDays = 60
 param logAnalyticsSku = 'PerGB2018'
+param logAnalyticsWorkspaceName = 'prod-law'
 
 param vnetAddressSpace = '10.2.0.0/16'
 
