@@ -43,16 +43,16 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enabledForDiskEncryption: false
     enablePurgeProtection: true
     enableSoftDelete: true
-    networkAcls: {
-      bypass: 'AzureServices'
-      defaultAction: 'Deny'
-      // virtualNetworkRules: [
-      //   {
-      //     id: privateEndpointSubnetId
-      //   }
-      // ]
-      ipRules: []
-    }
+    // networkAcls: {
+    //   bypass: 'AzureServices'
+    //   defaultAction: 'Deny'
+    //   virtualNetworkRules: [
+    //     {
+    //       id: privateEndpointSubnetId
+    //     }
+    //   ]
+    //   ipRules: []
+    // }
   }
   dependsOn: []
 }
@@ -144,7 +144,6 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
     userAssignedIdentity
   ]
 }
-
 
 output keyVaultId string = keyVault.id
 output keyVaultName string = keyVault.name
