@@ -46,11 +46,11 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: privateEndpointSubnetId
-        }
-      ]
+      // virtualNetworkRules: [
+      //   {
+      //     id: privateEndpointSubnetId
+      //   }
+      // ]
       ipRules: []
     }
   }
