@@ -99,7 +99,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
     template: {
       containers: [
         {
-          name: 'resume-screener-app'
+          name: '${environmentName}-resumescreener-app'
           image: containerImage
           resources: {
             cpu: json('0.5')

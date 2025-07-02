@@ -1,7 +1,8 @@
 using 'main.bicep'
 
 param environmentName = 'prod'
-param location = 'centralus'
+param location = 'eastus'
+param useAzureOpenAI = false
 
 param containerImage = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 

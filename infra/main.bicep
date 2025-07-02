@@ -11,6 +11,9 @@ param environmentName string
 @description('Azure region for the deployment')
 param location string = resourceGroup().location
 
+@description('Whether or not to deploy an Azure Open AI resource.')
+param useAzureOpenAI bool = false
+
 @description('Container image to deploy')
 param containerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
@@ -90,6 +93,10 @@ param tags object = {
   Project: 'ResumeScreener'
   CreatedBy: 'bieryzt@mail.uc.edu'
 }
+
+@description('Optional. Groq API key. Used as a fallback if useAzureOpenAI is set to false.')
+@secure()
+param groqApiKey string = ''
 
 // Deploy User-Assigned Managed Identity first
 module identity 'modules/identity.bicep' = {
@@ -181,8 +188,8 @@ module acr 'modules/acr.bicep' = {
   ]
 }
 
-// Deploy OpenAI Service
-module openai 'modules/openai.bicep' = {
+// Deploy OpenAI Service (only if useAzureOpenAI is true)
+module openai 'modules/openai.bicep' = if (useAzureOpenAI) {
   name: 'openai-deployment'
   params: {
     environmentName: environmentName
@@ -201,6 +208,19 @@ module openai 'modules/openai.bicep' = {
   ]
 }
 
+// If OpenAI is not used, fallback to Groq and store as KV secret.
+module groq 'modules/groq.bicep' = if (!useAzureOpenAI) {
+  name: 'groq-deployment'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    groqApiKey: groqApiKey
+  }
+  dependsOn: [
+    identity
+    keyVault
+  ]
+}
+
 // Deploy Container App (depends on all other services)
 module containerApp 'modules/containerapp.bicep' = {
   name: 'containerapp-deployment'
@@ -212,7 +232,7 @@ module containerApp 'modules/containerapp.bicep' = {
     applicationInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
     userAssignedIdentityName: identity.outputs.userAssignedIdentityName
     keyVaultUri: 'https://${keyVault.outputs.keyVaultName}.vault.azure.net/'
-    openAiEndpoint: openai.outputs.openAiEndpoint
+    openAiEndpoint: useAzureOpenAI ? (openai.outputs.openAiEndpoint ?? '') : 'https://api.groq.com/openai/v1'
     containerImage: containerImage
     subnetId: networking.outputs.containerAppSubnetId
     acrLoginServer: acr.outputs.loginServer
@@ -222,7 +242,6 @@ module containerApp 'modules/containerapp.bicep' = {
     networking
     monitoring
     keyVault
-    openai
     acr
   ]
 }
@@ -259,10 +278,10 @@ output acrId string = acr.outputs.acrId
 output acrName string = acr.outputs.acrName
 output acrLoginServer string = acr.outputs.loginServer
 
-// OpenAI outputs
-output openAiServiceId string = openai.outputs.openAiServiceId
-output openAiResourceName string = openai.outputs.openAiResourceName
-output openAiEndpoint string = openai.outputs.openAiEndpoint
+// Conditional OpenAI outputs (only when useAzureOpenAI is true)
+output openAiServiceId string = useAzureOpenAI ? openai.outputs.openAiServiceId : ''
+output openAiResourceName string = useAzureOpenAI ? openai.outputs.openAiResourceName : ''
+output openAiEndpoint string = useAzureOpenAI ? openai.outputs.openAiEndpoint : ''
 
 // Container App outputs
 output containerAppId string = containerApp.outputs.containerAppId
