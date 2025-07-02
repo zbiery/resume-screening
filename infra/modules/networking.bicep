@@ -1,4 +1,3 @@
-// modules/networking.bicep - Virtual network and related components
 param environmentName string
 param location string
 param tags object
@@ -40,6 +39,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
         properties: {
           addressPrefix: storageSubnetPrefix
           privateEndpointNetworkPolicies: 'Disabled'
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.Storage'
+              locations: [
+                location
+              ]
+            }
+          ]
         }
       }
       {
@@ -47,6 +54,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
         properties: {
           addressPrefix: keyVaultSubnetPrefix
           privateEndpointNetworkPolicies: 'Disabled'
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.KeyVault'
+              locations: [
+                location
+              ]
+            }
+          ]
         }
       }
       {
@@ -54,6 +69,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
         properties: {
           addressPrefix: openAiSubnetPrefix
           privateEndpointNetworkPolicies: 'Disabled'
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.CognitiveServices'
+              locations: [
+                location
+              ]
+            }
+          ]
         }
       }
       {
@@ -61,6 +84,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
         properties: {
           addressPrefix: acrSubnetPrefix
           privateEndpointNetworkPolicies: 'Disabled'
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.ContainerRegistry'
+              locations: [
+                location
+              ]
+            }
+          ]
         }
       }
     ]
