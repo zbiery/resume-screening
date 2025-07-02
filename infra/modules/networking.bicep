@@ -2,7 +2,7 @@ param environmentName string
 param location string
 param tags object
 param vnetAddressSpace string = '10.0.0.0/16'
-param containerAppSubnetPrefix string = '10.0.1.0/24'
+param containerAppSubnetPrefix string = '10.0.1.0/23'
 param storageSubnetPrefix string = '10.0.2.0/24'
 param keyVaultSubnetPrefix string = '10.0.3.0/24'
 param openAiSubnetPrefix string = '10.0.4.0/24'
