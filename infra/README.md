@@ -91,13 +91,45 @@ Name: AZURE_SUBSCRIPTION_ID
 Value: xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx
 Scope: Environment-level secret (dev, test, prod)
 ```
+**Optional**
+If you are utilizing a free trial or Azure student subscription, you may wish to refrain from using AzureOpenAI resources due to the strict quota provided. As a fallback option, this project has been configured to allow for the use of free open-source LLMs provided via [Groq](https://groq.com/). If you wish to utilize **Groq** as opposed to **AzureOpenAI**, register for a free account, retrieve your API key, and store it as a *Repository* secret in GitHub
+```
+Name: GROQ_API_KEY
+Value: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Scope: Repository-level secret
+```
+To turn off OpenAI deployments, set the **useAzureOpenAi** parameter to *false* in the bicepparam files.
 
 ## Deployment Steps
-1. Create a resource group for your environment:
+1. Register required resource providers in your subscription. This may take a few moments.
+```bash
+az provider register --namespace Microsoft.Resources
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.ManagedIdentity
+az provider register --namespace Microsoft.Authorization
+az provider register --namespace Microsoft.KeyVault
+az provider register --namespace Microsoft.App
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.Insights
+az provider register --namespace Microsoft.Storage
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.CognitiveServices
+az provider register --namespace Microsoft.ContainerService
+```
+
+2. Create a resource group for your environment:
 ```bash
 az group create --name "<resource-group-name>" --location "<azure-region>"
 ```
-2. Deploy Bicep with the matching parameter file:
+3. Edit the parameter files for your desired configuration. 
+4. Run the GitHub Actions Workflow for your target environment.
+```
+In your GitHub Repository:
+Actions -> All Workflows -> Deploy Full Infrastructure -> Select Target Environment
+```
+
+**Optional**
+To deploy Bicep manually (using the Azure CLI), run the following with the matching parameter file:
 ```bash
 az deployment group create \
   --resource-group <resource-group-name> \
