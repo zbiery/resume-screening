@@ -2,13 +2,13 @@ param environmentName string
 param location string
 param tags object
 param vnetAddressSpace string = '10.0.0.0/16'
-param containerAppSubnetPrefix string = '10.0.0.0/23' // 10.0.0.0 – 10.0.1.255
-param storageSubnetPrefix string = '10.0.2.0/24' // 10.0.2.0 – 10.0.2.255
-param keyVaultSubnetPrefix string = '10.0.3.0/24' // 10.0.3.0 – 10.0.3.255
-param openAiSubnetPrefix string = '10.0.4.0/24' // 10.0.4.0 – 10.0.4.255
-param acrSubnetPrefix string = '10.0.5.0/24' // 10.0.5.0 – 10.0.5.255
+param containerAppSubnetPrefix string = '10.0.0.0/23'
+param storageSubnetPrefix string = '10.0.2.0/24'
+param keyVaultSubnetPrefix string = '10.0.3.0/24'
+param openAiSubnetPrefix string = '10.0.4.0/24'
+param acrSubnetPrefix string = '10.0.5.0/24'
 
-// Network Security Group for Container Apps
+// NSG for Container Apps
 resource containerAppNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
   name: '${environmentName}-container-app-nsg'
   location: location
@@ -45,35 +45,16 @@ resource containerAppNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = 
   }
 }
 
-// Virtual Network
+// VNet and subnets (excluding container app subnet)
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
   name: '${environmentName}-vnet'
   location: location
   tags: tags
   properties: {
     addressSpace: {
-      addressPrefixes: [
-        vnetAddressSpace
-      ]
+      addressPrefixes: [vnetAddressSpace]
     }
     subnets: [
-      {
-        name: '${environmentName}-container-app-subnet'
-        properties: {
-          addressPrefix: containerAppSubnetPrefix
-          delegations: [
-            {
-              name: 'Microsoft.App/environments'
-              properties: {
-                serviceName: 'Microsoft.App/environments'
-              }
-            }
-          ]
-          networkSecurityGroup: {
-            id: containerAppNsg.id
-          }
-        }
-      }
       {
         name: '${environmentName}-storage-subnet'
         properties: {
@@ -82,9 +63,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
           serviceEndpoints: [
             {
               service: 'Microsoft.Storage'
-              locations: [
-                location
-              ]
+              locations: [location]
             }
           ]
         }
@@ -97,9 +76,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
           serviceEndpoints: [
             {
               service: 'Microsoft.KeyVault'
-              locations: [
-                location
-              ]
+              locations: [location]
             }
           ]
         }
@@ -112,9 +89,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
           serviceEndpoints: [
             {
               service: 'Microsoft.CognitiveServices'
-              locations: [
-                location
-              ]
+              locations: [location]
             }
           ]
         }
@@ -127,9 +102,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
           serviceEndpoints: [
             {
               service: 'Microsoft.ContainerRegistry'
-              locations: [
-                location
-              ]
+              locations: [location]
             }
           ]
         }
@@ -138,10 +111,31 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
   }
 }
 
+// Container App Subnet (separate resource)
+resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' = {
+  name: '${environmentName}-container-app-subnet'
+  parent: vnet
+  properties: {
+    addressPrefix: containerAppSubnetPrefix
+    delegations: [
+      {
+        name: 'delegation'
+        properties: {
+          serviceName: 'Microsoft.App/environments'
+        }
+      }
+    ]
+    networkSecurityGroup: {
+      id: containerAppNsg.id
+    }
+    privateEndpointNetworkPolicies: 'Disabled'
+  }
+}
+
 // Outputs
 output vnetId string = vnet.id
 output vnetName string = vnet.name
-output containerAppSubnetId string = '${vnet.id}/subnets/${environmentName}-container-app-subnet'
+output containerAppSubnetId string = containerAppSubnet.id
 output storageSubnetId string = '${vnet.id}/subnets/${environmentName}-storage-subnet'
 output keyVaultSubnetId string = '${vnet.id}/subnets/${environmentName}-keyvault-subnet'
 output openAiSubnetId string = '${vnet.id}/subnets/${environmentName}-openai-subnet'
