@@ -53,7 +53,7 @@ param logAnalyticsWorkspaceName string = '${environmentName}-law'
 param vnetAddressSpace string = '10.0.0.0/16'
 
 @description('Container Apps subnet prefix')
-param containerAppSubnetPrefix string = '10.0.0.0/23'
+param containerAppSubnetPrefix string = '10.0.10.0/23'
 
 @description('Storage subnet prefix')
 param storageSubnetPrefix string = '10.0.2.0/24'
