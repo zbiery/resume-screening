@@ -15,7 +15,7 @@ param logAnalyticsWorkspaceName = 'test-law'
 
 param vnetAddressSpace = '10.1.0.0/16'
 
-param containerAppSubnetPrefix = '10.1.1.0/23' //must be 23 or larger
+param containerAppSubnetPrefix = '10.0.0.0/23' //must be 23 or larger
 param storageSubnetPrefix = '10.1.2.0/24'
 param keyVaultSubnetPrefix = '10.1.3.0/24'
 param openAiSubnetPrefix = '10.1.4.0/24'

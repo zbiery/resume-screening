@@ -2,11 +2,12 @@ param environmentName string
 param location string
 param tags object
 param vnetAddressSpace string = '10.0.0.0/16'
-param containerAppSubnetPrefix string = '10.0.1.0/23'
-param storageSubnetPrefix string = '10.0.2.0/24'
-param keyVaultSubnetPrefix string = '10.0.3.0/24'
-param openAiSubnetPrefix string = '10.0.4.0/24'
-param acrSubnetPrefix string = '10.0.5.0/24'
+param containerAppSubnetPrefix string = '10.0.0.0/23' // 10.0.0.0 – 10.0.1.255
+param storageSubnetPrefix string = '10.0.2.0/24' // 10.0.2.0 – 10.0.2.255
+param keyVaultSubnetPrefix string = '10.0.3.0/24' // 10.0.3.0 – 10.0.3.255
+param openAiSubnetPrefix string = '10.0.4.0/24' // 10.0.4.0 – 10.0.4.255
+param acrSubnetPrefix string = '10.0.5.0/24' // 10.0.5.0 – 10.0.5.255
+
 
 // Virtual Network
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
