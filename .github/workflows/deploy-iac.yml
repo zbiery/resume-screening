@@ -56,5 +56,8 @@ jobs:
           az deployment group create \
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
             --template-file infra/main.bicep \
-            --parameters ${{ steps.vars.outputs.PARAMS_FILE }}
-            --parameters groqApiKey="${{ secrets.GROQ_API_KEY }}"
+            --parameters ${{ steps.vars.outputs.PARAMS_FILE }} \
+            --parameters groqApiKey="${{ secrets.GROQ_API_KEY }}" \
+            --debug
+
+
