@@ -36,9 +36,9 @@ jobs:
           echo "RESOURCE_GROUP=rg-resume-screener-$ENV" >> $GITHUB_OUTPUT
           echo "PARAMS_FILE=infra/main.$ENV.bicepparam" >> $GITHUB_OUTPUT
 
-      - name: Ensure Azure CLI is up-to-date
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      # - name: Ensure Azure CLI is up-to-date
+      #   run: |
+      #     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       # # Test deployment
       # - name: Run Bicep What-If Deployment
@@ -57,7 +57,6 @@ jobs:
             --resource-group ${{ steps.vars.outputs.RESOURCE_GROUP }} \
             --template-file infra/main.bicep \
             --parameters ${{ steps.vars.outputs.PARAMS_FILE }} \
-            --parameters groqApiKey="${{ secrets.GROQ_API_KEY }}" \
-            --debug
+            --parameters groqApiKey="${{ secrets.GROQ_API_KEY }}" 
 
 

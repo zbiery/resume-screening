@@ -8,6 +8,42 @@ param keyVaultSubnetPrefix string = '10.0.3.0/24' // 10.0.3.0 – 10.0.3.255
 param openAiSubnetPrefix string = '10.0.4.0/24' // 10.0.4.0 – 10.0.4.255
 param acrSubnetPrefix string = '10.0.5.0/24' // 10.0.5.0 – 10.0.5.255
 
+// Network Security Group for Container Apps
+resource containerAppNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: '${environmentName}-container-app-nsg'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowHTTPS'
+        properties: {
+          priority: 1000
+          access: 'Allow'
+          direction: 'Inbound'
+          destinationPortRange: '443'
+          protocol: 'Tcp'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'AllowHTTP'
+        properties: {
+          priority: 1100
+          access: 'Allow'
+          direction: 'Inbound'
+          destinationPortRange: '80'
+          protocol: 'Tcp'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
+  }
+}
 
 // Virtual Network
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
@@ -33,6 +69,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
               }
             }
           ]
+          networkSecurityGroup: {
+            id: containerAppNsg.id
+          }
         }
       }
       {
@@ -93,63 +132,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
               ]
             }
           ]
-        }
-      }
-    ]
-  }
-}
-
-// Network Security Group for Container Apps
-resource containerAppNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
-  name: '${environmentName}-container-app-nsg'
-  location: location
-  tags: tags
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowHTTPS'
-        properties: {
-          priority: 1000
-          access: 'Allow'
-          direction: 'Inbound'
-          destinationPortRange: '443'
-          protocol: 'Tcp'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-      {
-        name: 'AllowHTTP'
-        properties: {
-          priority: 1100
-          access: 'Allow'
-          direction: 'Inbound'
-          destinationPortRange: '80'
-          protocol: 'Tcp'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-    ]
-  }
-}
-
-// Associate NSGs with subnets
-resource containerAppSubnetNsgAssociation 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' = {
-  parent: vnet
-  name: '${environmentName}-container-app-subnet'
-  properties: {
-    addressPrefix: containerAppSubnetPrefix
-    networkSecurityGroup: {
-      id: containerAppNsg.id
-    }
-    delegations: [
-      {
-        name: 'Microsoft.App/environments'
-        properties: {
-          serviceName: 'Microsoft.App/environments'
         }
       }
     ]
