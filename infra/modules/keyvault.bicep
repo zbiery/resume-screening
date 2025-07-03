@@ -17,7 +17,7 @@ param privateEndpointSubnetId string
 param virtualNetworkId string
 
 // Key Vault name must be globally unique, let's generate
-var keyVaultName = toLower('${environmentName}kv${uniqueString(resourceGroup().id)}')
+var keyVaultName = toLower('${environmentName}kv${uniqueString(resourceGroup().id)}-01')
 var dnsZoneName = 'privatelink.vaultcore.azure.net'
 
 // Built-in role definition IDs (these are the same across all Azure subscriptions)
