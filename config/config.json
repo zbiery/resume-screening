@@ -1,7 +1,7 @@
 {
   "dev": {
     "KEYVAULT": {
-      "NAME": "devkvdkfh3bag6pnqs"
+      "NAME": "devkvdkfh3bag6pnqs-01"
     },
     "STORAGE": {
       "ACCOUNT_NAME": "devsadkfh3bag6pnqs",
@@ -11,12 +11,13 @@
       "USE_AZURE_OPENAI": false,
       "AZURE_OPENAI": {
         "ENDPOINT": "https://dev-openai.openai.azure.com/",
-        "MODEL": "gpt-4o-mini"
+        "MODEL": "gpt-4o-mini",
+        "API_VERSION" : "2024-02-01"
       },
       "GROQ": {
         "ENDPOINT": "https://api.groq.com/openai/v1",
         "SECRET_NAME": "GroqApiKey",
-        "MODEL": "gemma2-9b-it"
+        "MODEL": "llama3-70b-8192"
       }
     },
     "LOGGING": {
@@ -34,12 +35,13 @@
     "LLM": {
       "AZURE_OPENAI": {
         "ENDPOINT": "https://test-openai.openai.azure.com/",
-        "MODEL": "gpt-4o-mini"
+        "MODEL": "gpt-4o-mini",
+        "API_VERSION" : "2024-02-01"
       },
       "GROQ": {
         "ENDPOINT": "https://api.groq.com/openai/v1",
         "SECRET_NAME": "groq-api-key",
-        "MODEL": "mixtral-8x7b-32768"
+        "MODEL": "deepseek-r1-distill-llama-70b"
       }
     },
     "LOGGING": {
@@ -57,12 +59,13 @@
     "LLM": {
       "AZURE_OPENAI": {
         "ENDPOINT": "https://prod-openai.openai.azure.com/",
-        "MODEL": "gpt-4o"
+        "MODEL": "gpt-4o",
+        "API_VERSION" : "2024-02-01"
       },
       "GROQ": {
         "ENDPOINT": "https://api.groq.com/openai/v1",
         "SECRET_NAME": "groq-api-key",
-        "MODEL": "llama3-70b-8192"
+        "MODEL": "deepseek-r1-distill-llama-70b"
       }
     },
     "LOGGING": {

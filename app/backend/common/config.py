@@ -12,8 +12,6 @@ class AppConfig:
         environment = os.getenv("ENVIRONMENT", "dev")
         self.environment = environment
 
-        print(config_path)
-
         full_path = Path(config_path)
         if not full_path.exists():
             raise FileNotFoundError(f"Config file not found: {full_path.resolve()}")
@@ -57,6 +55,10 @@ class AppConfig:
     @property
     def openai_model(self) -> str:
         return self.config["LLM"]["AZURE_OPENAI"]["MODEL"]
+    
+    @property
+    def openai_api_version(self) -> str:
+        return self.config["LLM"]["AZURE_OPENAI"]["API_VERSION"]
 
     @property
     def groq_endpoint(self) -> str:
