@@ -1,16 +1,54 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
+# from abc import ABC, abstractmethod
 
-@dataclass
-class Response:
-    text: str | None
-    input_tokens: int 
-    output_tokens: int 
+# class AIServiceInterface(ABC):
+#     """Abstract base class for AI services"""
+
+#     @abstractmethod
+#     async def query(self, prompt: str, **kwargs) -> str:
+#         """Simple one-turn query to the AI service"""
+#         pass
+
+#     @abstractmethod
+#     async def structured_query(self, text: str, system_prompt: str, functions: list[dict]) -> dict:
+#         """
+#         Structured query using system prompts and function calling.
+        
+#         Args:
+#             text: Input string (e.g., job description or resume)
+#             system_prompt: System-level instruction prompt
+#             functions: List of OpenAI-style function definitions
+
+#         Returns:
+#             Parsed dictionary from model's function call output
+#         """
+#         pass
+
+from abc import ABC, abstractmethod
 
 class AIServiceInterface(ABC):
     """Abstract base class for AI services"""
-    
+
     @abstractmethod
-    def query(self, prompt: str, **kwargs) -> Response:
-        """Query the AI service with a prompt"""
+    async def query(self, prompt: str, **kwargs) -> str:
+        """Simple one-turn query to the AI service"""
+        pass
+
+    @abstractmethod
+    async def structured_query(self, text: str, system_prompt: str, functions: list[dict]) -> dict:
+        """
+        Structured query using system prompts and function calling.
+        
+        Args:
+            text: Input string (e.g., job description or resume)
+            system_prompt: System-level instruction prompt
+            functions: List of OpenAI-style function definitions
+
+        Returns:
+            Parsed dictionary from model's function call output
+        """
+        pass
+
+    @abstractmethod
+    async def close():
+        """Closes HTTP connection for the client service"""
         pass
