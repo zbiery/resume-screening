@@ -1,1 +1,0 @@
-# resume viewing component

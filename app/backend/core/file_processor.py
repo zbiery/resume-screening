@@ -1,5 +1,4 @@
 import os
-import asyncio
 from abc import ABC
 from collections.abc import AsyncGenerator
 from typing import IO, List
@@ -58,17 +57,33 @@ class FileProcessor():
             ".docx": DocxParser(),
         }
 
-    async def process(self, content: IO) -> List[str]:
+    async def process(self, content: IO, file_extension: str) -> List[str]:
         "Method for extracting text from content objects"
-        _, ext = os.path.splitext(content.name.lower())
+        ext = file_extension.lower()
+        if not ext.startswith("."):
+            ext = "." + ext
 
         parser = self.parsers.get(ext)
         if not parser:
             logger.error("Unsupported file extension: %s", ext)
             raise ValueError(f"Unsupported file extension: {ext}")
 
-        logger.info("Using %s parser for file: %s", ext.upper(), content.name)
+        # For logging, try to get filename, fallback if unavailable
+        filename = getattr(content, "name", "unknown")
+        logger.info("Using %s parser for file: %s", ext.upper(), filename)
         return [chunk async for chunk in parser.parse(content)]
+    
+    # async def process(self, content: IO) -> List[str]:
+    #     "Method for extracting text from content objects"
+    #     _, ext = os.path.splitext(content.name.lower())
+
+    #     parser = self.parsers.get(ext)
+    #     if not parser:
+    #         logger.error("Unsupported file extension: %s", ext)
+    #         raise ValueError(f"Unsupported file extension: {ext}")
+
+    #     logger.info("Using %s parser for file: %s", ext.upper(), content.name)
+    #     return [chunk async for chunk in parser.parse(content)]
 
     async def extract_from_file(self, file_path: str) -> str:
         """
@@ -78,15 +93,9 @@ class FileProcessor():
         text_chunks = []
 
         with open(file_path, "rb") as f:
-            chunks = await self.process(f)
+            chunks = await self.process(f,f.name.split('.')[1])
 
         return "\n".join(chunk.strip() for chunk in chunks)
-    
-    def extract_from_file_sync(self, file_path: str) -> str:
-        """
-        Synchronous wrapper for the async extract_from_file function.
-        """
-        return asyncio.run(self.extract_from_file(file_path))
         
 #####    Example Usage    #####
 # processor = FileProcessor()

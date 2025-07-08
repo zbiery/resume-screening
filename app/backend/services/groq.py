@@ -97,14 +97,11 @@
 #             logger.error(f"Structured Groq query failed: {e}")
 #             raise
 
-import json
-import jsbeautifier
-
 from azure.identity.aio import DefaultAzureCredential
 from azure.keyvault.secrets.aio import SecretClient
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers import JsonOutputKeyToolsParser
+import json, jsbeautifier
 
 from .schema import AIServiceInterface
 from ..common.logger import get_logger
@@ -117,10 +114,11 @@ class GroqService(AIServiceInterface):
         self.secret_name = secret_name
         self.model_name = model_name
         self.llm = None
+        self._credential: DefaultAzureCredential | None = None
 
     async def initialize(self):
-        credential = DefaultAzureCredential()
-        secret_client = SecretClient(vault_url=self.keyvault_url, credential=credential)
+        self._credential = DefaultAzureCredential()
+        secret_client = SecretClient(vault_url=self.keyvault_url, credential=self._credential)
 
         try:
             logger.debug("Retrieving Groq API key from Azure Key Vault...")
@@ -133,7 +131,7 @@ class GroqService(AIServiceInterface):
         finally:
             await secret_client.close()
 
-        self.llm = ChatGroq(api_key=api_key, model=self.model_name, temperature=0.7) # type: ignore
+        self.llm = ChatGroq(api_key=api_key, model=self.model_name, temperature=0.7)  # type: ignore
 
     async def query(self, prompt: str, **kwargs) -> str:
         if not self.llm:
@@ -142,10 +140,10 @@ class GroqService(AIServiceInterface):
         try:
             logger.info(f"Calling Groq model '{self.model_name}' using ainvoke...")
             if "temperature" in kwargs:
-                self.llm.temperature = kwargs["temperature"] # type: ignore
+                self.llm.temperature = kwargs["temperature"]  # type: ignore
 
-            result = await self.llm.ainvoke([HumanMessage(content=prompt)]) # type: ignore
-            return result.content # type: ignore
+            result = await self.llm.ainvoke([HumanMessage(content=prompt)])  # type: ignore
+            return result.content  # type: ignore
         except Exception as e:
             logger.error(f"Groq ainvoke query failed: {e}")
             raise
@@ -156,7 +154,7 @@ class GroqService(AIServiceInterface):
 
         try:
             logger.info("Running structured query with function calling using ainvoke...")
-            response = await self.llm.ainvoke( # type: ignore
+            response = await self.llm.ainvoke(  # type: ignore
                 input=[
                     SystemMessage(content=system_prompt),
                     HumanMessage(content=text)
@@ -180,4 +178,7 @@ class GroqService(AIServiceInterface):
             raise
 
     async def close(self):
-        pass
+        """Clean up async resources like DefaultAzureCredential"""
+        if self._credential:
+            await self._credential.close()
+            logger.info("GroqService credential closed.")

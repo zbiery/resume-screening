@@ -49,6 +49,6 @@ class AIServiceInterface(ABC):
         pass
 
     @abstractmethod
-    async def close():
+    async def close(self) -> None:
         """Closes HTTP connection for the client service"""
         pass
