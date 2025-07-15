@@ -55,5 +55,6 @@ class Analyzer:
         return await self.ai_service.structured_query(
             text=input_text,
             system_prompt=system_prompt_match,  
-            functions=fn_match
+            functions=fn_match,
+            function_call={"name": "MatchJobToCandidate"}
         )

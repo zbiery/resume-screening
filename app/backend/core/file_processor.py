@@ -97,7 +97,3 @@ class FileProcessor():
 
         return "\n".join(chunk.strip() for chunk in chunks)
         
-#####    Example Usage    #####
-# processor = FileProcessor()
-# content = processor.extract_from_file_sync("data/ZacharyBiery_CV_2024.docx")
-# print(content)

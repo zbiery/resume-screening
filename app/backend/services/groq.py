@@ -49,7 +49,7 @@ class GroqService(AIServiceInterface):
             logger.error(f"Groq ainvoke query failed: {e}")
             raise
 
-    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str = "default") -> dict:
+    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str | dict = "default") -> dict:
         if not self.llm:
             await self.initialize()
 
