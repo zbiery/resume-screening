@@ -198,178 +198,343 @@ fn_candidate_analysis = [
 fn_job_analysis = [
     {
         "name": "AnalyzeJob",
-        "description": "Read the job description and answer question.",
+        "description": "Parses a job description to extract structured qualifications, responsibilities, and skill requirements.",
         "parameters": {
             "type": "object",
             "properties": {
-                "degree": {
+                "job_title": {
+                    "type": "string",
+                    "description": "Official job title or role name, e.g., 'Machine Learning Engineer', 'Product Manager'.",
+                    "minLength": 1,
+                },
+                "job_level": {
+                    "type": "string",
+                    "description": "Seniority level or rank of the position. Example: 'Internship', 'Entry-level', 'Mid', 'Senior', 'Lead', 'Director'.",
+                    "minLength": 1,
+                },
+                "employment_type": {
+                    "type": "string",
+                    "description": "Type of employment. Example: 'Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary'.",
+                    "minLength": 1,
+                },
+                "location_requirement": {
+                    "type": "string",
+                    "description": "Location requirements or constraints for the role. Example: 'Remote', 'Hybrid in NYC', 'Onsite in Austin, TX'.",
+                    "minLength": 1,
+                },
+                "years_of_experience": {
+                    "type": "number",
+                    "description": "Minimum or average years of relevant experience required, as stated or inferred from the job description. Example: 2, 5.5",
+                    "minimum": 0,
+                },
+                "educational_requirements": {
                     "type": "array",
+                    "description": "List of required or preferred educational qualifications, including degree level and a list of acceptable fields of study.",
                     "items": {
-                        "type": "string",
+                        "type": "object",
+                        "properties": {
+                            "level": {
+                                "type": "string",
+                                "description": "Required degree level, e.g., Bachelor's, Master's, PhD.",
+                                "minLength": 1,
+                                "enum": [
+                                    "Associates",
+                                    "Baccalaureate",
+                                    "Bachelor's",
+                                    "Masters",
+                                    "Master's",
+                                    "PhD",
+                                    "Doctorate",
+                                    "Diploma",
+                                    "Certificate"
+                                ]
+                            },
+                            "fields": {
+                                "type": "array",
+                                "description": "Array of acceptable fields of study. Example: ['Computer Science', 'Electrical Engineering', 'Statistics'].",
+                                "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                },
+                                "minItems": 1,
+                                "uniqueItems": True
+                            }
+                        },
+                        "required": ["level", "fields"],
+                        "additionalProperties": False,
                     },
-                    "description": "educational qualifications required, e.g., Bachelor's degree in Computer Science.",
+                    "minItems": 0,
+                    "uniqueItems": False,
                 },
                 "experience": {
                     "type": "array",
+                    "description": "Relevant experience required. Include domain or task-specific expectations (e.g., '3+ years in cloud systems design').",
                     "items": {
                         "type": "string",
+                        "minLength": 1,
                     },
-                    "description": "Experiences required at position.",
+                    "minItems": 0,
+                    "uniqueItems": False,
                 },
                 "technical_skill": {
                     "type": "array",
+                    "description": "List of technical skills, tools, or technologies mentioned in the job description.",
                     "items": {
                         "type": "string",
+                        "minLength": 1,
                     },
-                    "description": "specific technical skills and proficiencies. e.g. Java,  Python, Linux, SQL.",
+                    "minItems": 0,
+                    "uniqueItems": True,
                 },
-                "responsibility": {
+                "responsibilities": {
                     "type": "array",
+                    "description": "List of key job responsibilities outlined in the description.",
                     "items": {
                         "type": "string",
+                        "minLength": 1,
                     },
-                    "description": "Responsibilities for position candidate required. e.g. Evaluate and prioritize the many services and products that can benefit from AI, Work on the product and architectural implications, that is build, deploy, and test models",
+                    "minItems": 0,
+                    "uniqueItems": False,
                 },
                 "certificate": {
                     "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Required certificates for the position, e.g., CompTIA Security+.",
+                    "description": "List of certifications required or preferred. Example: 'AWS Certified Developer', 'PMP'.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1,
+                    },
+                    "minItems": 0,
+                    "uniqueItems": True,
                 },
                 "soft_skill": {
                     "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Soft skills required for the job, inferred from the provided information. e.g. Language, communication, teamwork, adaptability.",
+                    "description": "Soft skills or personality traits expected. Example: 'collaboration', 'initiative', 'time management'.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1,
+                    },
+                    "minItems": 0,
+                    "uniqueItems": True,
                 },
+                "domain": {
+                    "type": "string",
+                    "description": "Industry or application domain. Example: 'Finance', 'Healthcare', 'Defense'.",
+                    "minLength": 1,
+                },
+                "ideal_candidate_summary": {
+                    "type": "string",
+                    "description": "Brief profile of the ideal candidate as implied by the job description. Highlight standout qualities, background, or behaviors.",
+                    "minLength": 100,
+                    "maxLength": 1200,
+                }
             },
             "required": [
-                "degree",
+                "job_title",
+                "job_level",
+                "employment_type",
+                "location_requirement",
+                "years_of_experience",
+                "educational_requirements",
                 "experience",
                 "technical_skill",
-                "responsibility",
+                "responsibilities",
                 "certificate",
                 "soft_skill",
+                "domain",
+                "ideal_candidate_summary"
             ],
-        },
+            "additionalProperties": False,
+        }
     }
 ]
 
-fn_matching_analysis = [
+fn_match = [
     {
-        "name": "evaluate",
-        "description": "For each requirement, score in 0 - 100 scale if the candidate match with the requirement or not.",
+        "name": "MatchJobToCandidate",
+        "description": "Evaluates how well a candidate matches a job description using structured scoring across categories, with comments explaining each score.",
         "parameters": {
             "type": "object",
             "properties": {
-                "degree": {
+                "education": {
                     "type": "object",
+                    "description": "Education matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) reflecting how well the candidate's education aligns with the job requirements.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement",
-                        },
+                            "description": "Explanation of the education score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
                 "experience": {
                     "type": "object",
+                    "description": "Experience matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) reflecting alignment in required years and relevance of prior roles.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not. e.g. 75 ",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement",
-                        },
+                            "description": "Explanation of the experience score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
                 "technical_skill": {
                     "type": "object",
+                    "description": "Technical skill matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) for technical skill overlap between job and candidate.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not. e.g. 75",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement.",
-                        },
+                            "description": "Explanation of the technical skill score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
                 "responsibility": {
                     "type": "object",
+                    "description": "Responsibility matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) for how well past responsibilities match current job expectations.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not. e.g. 75",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement.",
-                        },
+                            "description": "Explanation of the responsibility score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
                 "certificate": {
                     "type": "object",
+                    "description": "Certificate matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) for how well the candidate meets certification requirements.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not.",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement.",
-                        },
+                            "description": "Explanation of the certificate score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
                 "soft_skill": {
                     "type": "object",
+                    "description": "Soft skill matching details.",
                     "properties": {
                         "score": {
                             "type": "integer",
+                            "description": "Score (0–100) based on inferred or stated soft skills vs. job needs.",
                             "minimum": 0,
-                            "maximum": 100,
-                            "description": "Score if the candidate match with the requirement or not. e.g. 75",
+                            "maximum": 100
                         },
                         "comment": {
                             "type": "string",
-                            "description": "What match the requirement, what does not match the requirement, special soft skill in the CV.",
-                        },
+                            "description": "Explanation of the soft skill score.",
+                            "minLength": 1
+                        }
                     },
                     "required": ["score", "comment"],
+                    "additionalProperties": False
                 },
-                "summary_comment": {
+                "domain": {
+                    "type": "object",
+                    "description": "Domain relevance matching details.",
+                    "properties": {
+                        "score": {
+                            "type": "integer",
+                            "description": "Score (0–100) for industry/domain relevance between past experience and job context.",
+                            "minimum": 0,
+                            "maximum": 100
+                        },
+                        "comment": {
+                            "type": "string",
+                            "description": "Explanation of the domain score.",
+                            "minLength": 1
+                        }
+                    },
+                    "required": ["score", "comment"],
+                    "additionalProperties": False
+                },
+                "strengths": {
+                    "type": "array",
+                    "description": "List of key strengths and alignment reasons.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "gaps": {
+                    "type": "array",
+                    "description": "List of mismatches or weaknesses relative to the job.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "verdict": {
                     "type": "string",
-                    "description": "Give comment about matching candidate based on requirement",
+                    "description": "Overall textual evaluation of the match quality.",
+                    "enum": [
+                        "Strong match",
+                        "Moderate match",
+                        "Weak match",
+                        "Not a match"
+                    ]
                 },
+                "overall_summary": {
+                    "type": "string",
+                    "description": "A detailed 100-300 word summary explaining why the candidate is or is not a fit for the job.",
+                    "minLength": 600,
+                    "maxLength": 1800
+                }
             },
             "required": [
-                "degree",
+                "education",
                 "experience",
                 "technical_skill",
                 "responsibility",
                 "certificate",
                 "soft_skill",
-                "summary_comment",
+                "domain",
+                "strengths",
+                "gaps",
+                "verdict",
+                "overall_summary"
             ],
-        },
+            "additionalProperties": False
+        }
     }
 ]

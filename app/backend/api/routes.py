@@ -2,7 +2,7 @@ import os
 from fastapi import APIRouter, Request, UploadFile, File, Form,  HTTPException
 from fastapi.responses import JSONResponse
 
-from schemas import JobText, ResumeText
+from .schemas import JobText, ResumeText
 from ..common.logger import get_logger
 
 logger = get_logger(__name__)
