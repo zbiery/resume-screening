@@ -17,7 +17,7 @@
       "GROQ": {
         "ENDPOINT": "https://api.groq.com/openai/v1",
         "SECRET_NAME": "GroqApiKey",
-        "MODEL": "llama3-70b-8192"
+        "MODEL": "meta-llama/llama-4-scout-17b-16e-instruct"
       }
     },
     "LOGGING": {

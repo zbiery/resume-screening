@@ -161,7 +161,7 @@ fn_candidate_analysis = [
                 "comment": {
                     "type": "string",
                     "description": "Descriptive but brief summary about the candidate's strengths and standout qualities.",
-                    "minLength": 100,
+                    "minLength": 0,
                     "maxLength": 1200,
                 },
                 "job_recommended": {
@@ -205,22 +205,22 @@ fn_job_analysis = [
                 "job_title": {
                     "type": "string",
                     "description": "Official job title or role name, e.g., 'Machine Learning Engineer', 'Product Manager'.",
-                    "minLength": 1,
+                    "minLength": 0,
                 },
                 "job_level": {
                     "type": "string",
                     "description": "Seniority level or rank of the position. Example: 'Internship', 'Entry-level', 'Mid', 'Senior', 'Lead', 'Director'.",
-                    "minLength": 1,
+                    "minLength": 0,
                 },
                 "employment_type": {
                     "type": "string",
                     "description": "Type of employment. Example: 'Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary'.",
-                    "minLength": 1,
+                    "minLength": 0,
                 },
                 "location_requirement": {
                     "type": "string",
                     "description": "Location requirements or constraints for the role. Example: 'Remote', 'Hybrid in NYC', 'Onsite in Austin, TX'.",
-                    "minLength": 1,
+                    "minLength": 0,
                 },
                 "years_of_experience": {
                     "type": "number",
@@ -236,7 +236,7 @@ fn_job_analysis = [
                             "level": {
                                 "type": "string",
                                 "description": "Required degree level, e.g., Bachelor's, Master's, PhD.",
-                                "minLength": 1,
+                                "minLength": 0,
                                 "enum": [
                                     "Associates",
                                     "Baccalaureate",
@@ -254,9 +254,9 @@ fn_job_analysis = [
                                 "description": "Array of acceptable fields of study. Example: ['Computer Science', 'Electrical Engineering', 'Statistics'].",
                                 "items": {
                                     "type": "string",
-                                    "minLength": 1,
+                                    "minLength": 0,
                                 },
-                                "minItems": 1,
+                                "minItems": 0,
                                 "uniqueItems": True
                             }
                         },
@@ -271,7 +271,7 @@ fn_job_analysis = [
                     "description": "Relevant experience required. Include domain or task-specific expectations (e.g., '3+ years in cloud systems design').",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": False,
@@ -281,7 +281,7 @@ fn_job_analysis = [
                     "description": "List of technical skills, tools, or technologies mentioned in the job description.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -301,7 +301,7 @@ fn_job_analysis = [
                     "description": "List of certifications required or preferred. Example: 'AWS Certified Developer', 'PMP'.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -311,7 +311,7 @@ fn_job_analysis = [
                     "description": "Soft skills or personality traits expected. Example: 'collaboration', 'initiative', 'time management'.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -319,12 +319,12 @@ fn_job_analysis = [
                 "domain": {
                     "type": "string",
                     "description": "Industry or application domain. Example: 'Finance', 'Healthcare', 'Defense'.",
-                    "minLength": 1,
+                    "minLength": 0,
                 },
                 "ideal_candidate_summary": {
                     "type": "string",
                     "description": "Brief profile of the ideal candidate as implied by the job description. Highlight standout qualities, background, or behaviors.",
-                    "minLength": 100,
+                    "minLength": 0,
                     "maxLength": 1200,
                 }
             },
@@ -361,7 +361,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) reflecting how well the candidate's education aligns with the job requirements.",
+                            "description": "Score (0-100) reflecting how well the candidate's education aligns with the job requirements.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -380,7 +380,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) reflecting alignment in required years and relevance of prior roles.",
+                            "description": "Score (0-100) reflecting alignment in required years and relevance of prior roles.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -399,7 +399,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) for technical skill overlap between job and candidate.",
+                            "description": "Score (0-100) for technical skill overlap between job and candidate.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -418,7 +418,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) for how well past responsibilities match current job expectations.",
+                            "description": "Score (0-100) for how well past responsibilities match current job expectations.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -437,7 +437,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) for how well the candidate meets certification requirements.",
+                            "description": "Score (0-100) for how well the candidate meets certification requirements.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -456,7 +456,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) based on inferred or stated soft skills vs. job needs.",
+                            "description": "Score (0-100) based on inferred or stated soft skills vs. job needs.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -475,7 +475,7 @@ fn_match = [
                     "properties": {
                         "score": {
                             "type": "integer",
-                            "description": "Score (0–100) for industry/domain relevance between past experience and job context.",
+                            "description": "Score (0-100) for industry/domain relevance between past experience and job context.",
                             "minimum": 0,
                             "maximum": 100
                         },
@@ -517,7 +517,7 @@ fn_match = [
                 "overall_summary": {
                     "type": "string",
                     "description": "A detailed 100-300 word summary explaining why the candidate is or is not a fit for the job.",
-                    "minLength": 600,
+                    "minLength": 0,
                     "maxLength": 1800
                 }
             },

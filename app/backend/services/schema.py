@@ -9,7 +9,7 @@ class AIServiceInterface(ABC):
         pass
 
     @abstractmethod
-    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str | dict = "default") -> dict:
+    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str | dict = "auto") -> dict:
         """
         Structured query using system prompts and function calling.
         

@@ -121,4 +121,7 @@ Your task is to perform a thorough, evidence-based evaluation of the candidate's
 
 Your response will be used for candidate ranking and hiring decisions. Precision, clarity, and objectivity are paramount.
 Do not be generous or lenient — your output may be used for ranking multiple candidates.
+
+You must fill in all required fields in the function schema, even if a field is empty or unknown. For optional fields, return an empty string, array, or default value.
+Avoid omitting any fields — doing so will cause the function call to fail.
 """

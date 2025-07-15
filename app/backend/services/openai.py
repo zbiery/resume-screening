@@ -69,7 +69,7 @@ class AzureOpenAIService(AIServiceInterface):
             logger.error(f"Azure OpenAI async query failed: {e}")
             raise
 
-    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str | dict = "default") -> dict:
+    async def structured_query(self, text: str, system_prompt: str, functions: list[dict], function_call: str | dict = "auto") -> dict:
         if self._client is None:
             raise RuntimeError("Client not initialized. Call 'await initialize()' first.")
 
