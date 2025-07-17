@@ -13,8 +13,6 @@ fn_candidate_analysis = [
                 "phone_number": {
                     "type": "string",
                     "description": "Candidate's phone number, including country code if available."
-                    # "minLength": 7,
-                    # "pattern": "^[+\\d\\s()-]+$",  # Allows digits, spaces, parentheses, plus, dash
                 },
                 "email": {
                     "type": "string",
@@ -25,9 +23,6 @@ fn_candidate_analysis = [
                     "type": "array",
                     "items": {
                         "type": "string",
-                        # consider removing format if URLs may omit protocol,
-                        # or replace with pattern enforcing http(s):// prefix if you want strict URLs
-                        # "format": "uri",
                     },
                     "description": "Candidate's personal or professional URLs (LinkedIn, GitHub, portfolio, etc.).",
                     "minItems": 0,
@@ -74,7 +69,7 @@ fn_candidate_analysis = [
                             "gpa": {
                                 "type": ["string", "null"],
                                 "description": "GPA mentioned for this education entry, if any (e.g., 3.8/4.0). Optional.",
-                                "minLength": 1,
+                                "minLength": 0,
                                 "nullable": True
                             }
                         },
@@ -93,18 +88,18 @@ fn_candidate_analysis = [
                             "title": {
                                 "type": "string",
                                 "description": "Job title or role name, e.g., 'Software Engineer Intern'.",
-                                "minLength": 1,
+                                "minLength": 0,
                             },
                             "company": {
                                 "type": "string",
                                 "description": "Name of the company, e.g., 'Apple', 'Micrsoft'.",
-                                "minLength": 1,
+                                "minLength": 0,
                             },
                             "summary": {
                                 "type": "string",
                                 "description": "Brief summary of work completed in this role. Do not copy-paste existing information.",
-                                "minLength": 10,
-                                "maxLength": 500,
+                                "minLength": 0,
+                                "maxLength": 1000,
                             }
                         },
                         "required": ["title", "company", "summary"],
@@ -123,7 +118,7 @@ fn_candidate_analysis = [
                     "description": "List of technical skills and proficiencies.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -133,7 +128,7 @@ fn_candidate_analysis = [
                     "description": "List of key responsibilities from previous roles or projects.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": False,
@@ -143,7 +138,7 @@ fn_candidate_analysis = [
                     "description": "List of certificates or certifications achieved.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -153,7 +148,7 @@ fn_candidate_analysis = [
                     "description": "List of inferred soft skills (communication, leadership, etc.).",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -162,14 +157,14 @@ fn_candidate_analysis = [
                     "type": "string",
                     "description": "Descriptive but brief summary about the candidate's strengths and standout qualities.",
                     "minLength": 0,
-                    "maxLength": 1200,
+                    "maxLength": 3000,
                 },
                 "job_recommended": {
                     "type": "array",
                     "description": "List of recommended job titles the candidate should consider.",
                     "items": {
                         "type": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                     },
                     "minItems": 0,
                     "uniqueItems": True,
@@ -355,6 +350,16 @@ fn_match = [
         "parameters": {
             "type": "object",
             "properties": {
+                "candidate_name": {
+                    "type": "string",
+                    "description": "Name of the candidate being evaluated.",
+                    "minLength": 1
+                },
+                "job_title": {
+                    "type": "string",
+                    "description": "Title of the job position being matched against.",
+                    "minLength": 1
+                },
                 "education": {
                     "type": "object",
                     "description": "Education matching details.",
@@ -522,6 +527,8 @@ fn_match = [
                 }
             },
             "required": [
+                "candidate_name",
+                "job_title",
                 "education",
                 "experience",
                 "technical_skill",

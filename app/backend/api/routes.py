@@ -1,6 +1,8 @@
 import os
+import io
 from fastapi import APIRouter, Request, UploadFile, File, Form,  HTTPException
 from fastapi.responses import JSONResponse
+from typing import List, Dict, Any
 
 from .schemas import JobText, ResumeText
 from ..common.logger import get_logger
@@ -14,15 +16,12 @@ async def upload_resume(request: Request, file: UploadFile = File(...)):
     try:
         print(f"Received file: {file.filename}, content_type: {file.content_type}")
         
-        # Check if file is empty
+        # Read file contents
         contents = await file.read()
         print(f"File size: {len(contents)} bytes")
         
         if not contents:
             raise HTTPException(status_code=400, detail="Empty file received")
-        
-        # Reset file pointer
-        await file.seek(0)
         
         _, ext = os.path.splitext(file.filename) # type: ignore
         if not ext:
@@ -30,8 +29,12 @@ async def upload_resume(request: Request, file: UploadFile = File(...)):
         
         print(f"Processing file with extension: {ext}")
         
-        # FIXED: Access file_processor from app.state instead of app.processor
-        text_chunks = await request.app.state.file_processor.process(file.file, ext)
+        # Convert to BytesIO and add name attribute for logging
+        file_obj = io.BytesIO(contents)
+        file_obj.name = file.filename  # Add name attribute for your logger
+        
+        # Pass BytesIO object instead of file.file
+        text_chunks = await request.app.state.file_processor.process(file_obj, ext)
         extracted_text = "\n".join(text_chunks)
         
     except Exception as e:
@@ -123,4 +126,43 @@ async def analyze_job(request: Request, job: JobText):
         raise
     except Exception as e:
         logger.error(f"Unexpected error in analyze_job: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error during analysis")
+    
+@router.post("/match/analyze")
+async def match(request: Request, job: Dict[str, Any], candidates: List[Dict[str, Any]]):
+    try:
+        logger.info("Starting matching service")
+        
+        if not job:
+            logger.warning("Empty job content received for matching.")
+            raise HTTPException(status_code=400, detail="Job content cannot be empty")
+        
+        if not candidates:
+            logger.warning("Empty candidates content received for matching.")
+            raise HTTPException(status_code=400, detail="Candidates content cannot be empty")
+        
+        analyzer = request.app.state.analyzer
+        if not analyzer:
+            logger.error("Analyzer not found in app state")
+            raise HTTPException(status_code=500, detail="Analyzer not available")
+        
+        logger.info("Matching candidates...")
+        results = []
+        for candidate in candidates:
+            logger.info("Calling analyzer.match")
+            result = await analyzer.match(job, candidate)
+            results.append(result)
+        
+        if not results:
+            logger.warning("Analyzer returned empty results")
+            raise HTTPException(status_code=500, detail="Analysis failed - no result returned")
+        
+        logger.info("Matching completed successfully")
+        
+        return JSONResponse(content=results)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in matching: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during analysis")
