@@ -1,0 +1,43 @@
+# Git and GitHub
+.git/
+.github/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Data files (if not needed in container)
+data/
+*.docx
+*.pdf
+
+# Test files
+tests/
+
+# Infrastructure files
+infra/
+
+# Documentation
+README.md
+LICENSE
+
+# OS files
+.DS_Store
+Thumbs.db
