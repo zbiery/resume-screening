@@ -424,13 +424,6 @@ def run_matching_analysis():
             timeout=60  # Increased timeout for multiple candidates
         )
         
-        # Debug: Print response details
-        st.write(f"Response Status: {response.status_code}")
-        if response.status_code != 200:
-            st.error(f"API Error: {response.status_code}")
-            st.error(f"Response: {response.text}")
-            return
-        
         response.raise_for_status()
         match_results = response.json()
         
@@ -615,38 +608,63 @@ if st.session_state.matching_results:
         # Detailed breakdown (expandable)
         with st.expander(f"📋 Detailed Analysis for {candidate_info.get('name', 'Unknown')}"):
             
+            # Replace this section in your main code:
+            # Starting from "# Category scores grid" until before "# Strengths and Gaps"
+
             # Category scores grid
             st.markdown("#### 📊 Category Scores")
-            score_html = '<div class="score-grid">'
-            
+
+            # Define categories with their display names and icons
             categories = [
                 ('education', '🎓 Education'),
-                ('experience', '💼 Experience'),
+                ('experience', '💼 Experience'), 
                 ('technical_skill', '⚙️ Technical Skills'),
                 ('responsibility', '📋 Responsibilities'),
-                ('certificate', '📜 Certificates'),
                 ('soft_skill', '🤝 Soft Skills'),
-                ('domain', '🏢 Domain Knowledge')
+                ('domain', '🏢 Domain Knowledge'),
+                ('certificate', '📜 Certificates')
             ]
-            
-            for category_key, category_name in categories:
-                if category_key in result:
-                    category_data = result[category_key]
-                    score = category_data.get('score', 0)
-                    comment = category_data.get('comment', 'No comment')
-                    score_class = get_score_class(score)
+
+            # Filter categories that exist in the result
+            available_categories = [(k, v) for k, v in categories if k in result and isinstance(result[k], dict)]
+
+            if available_categories:
+                # Create a grid layout using columns
+                num_cols = 3
+                for i in range(0, len(available_categories), num_cols):
+                    chunk = available_categories[i:i+num_cols]
+                    cols = st.columns(len(chunk))
                     
-                    score_html += f'''
-                    <div class="score-card">
-                        <h4>{category_name}</h4>
-                        <div class="score {score_class}">{score}%</div>
-                        <div class="comment">{comment}</div>
-                    </div>
-                    '''
-            
-            score_html += '</div>'
-            st.markdown(score_html, unsafe_allow_html=True)
-            
+                    for j, (category_key, category_name) in enumerate(chunk):
+                        category_data = result[category_key]
+                        score = category_data.get('score', 0)
+                        comment = category_data.get('comment', 'No comment available')
+                        
+                        with cols[j]:
+                            # Create a styled container for each score
+                            st.markdown(f"""
+                            <div style="
+                                background: white;
+                                padding: 1rem;
+                                border-radius: 8px;
+                                border: 1px solid #e0e0e0;
+                                text-align: center;
+                                margin-bottom: 1rem;
+                            ">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #333; font-size: 0.9rem;">{category_name}</h4>
+                                <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">
+                                    <span class="{get_score_class(score)}">{score}%</span>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Show comment in a smaller expander
+                            with st.expander("💭 Details", expanded=False):
+                                st.write(comment)
+            else:
+                st.warning("No category scoring data available.")
+                st.write("Debug - Available keys:", list(result.keys()))
+                
             # Strengths and Gaps
             st.markdown("#### 💪 Strengths & Gaps")
             strengths = result.get('strengths', [])
@@ -679,9 +697,6 @@ if st.session_state.matching_results:
             </div>
             """, unsafe_allow_html=True)
             
-            # Raw data (for debugging)
-            with st.expander("🔍 Raw Match Data (Debug)"):
-                st.json(result)
 
 # Clear results button
 if st.session_state.matching_results:

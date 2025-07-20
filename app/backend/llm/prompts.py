@@ -11,13 +11,19 @@ Follow these guidelines:
 5. For education and certifications:
    - Only extract what is explicitly stated in the input.
    - Do not infer or assume any degrees or certificates unless clearly mentioned.
-6. For technical skills, responsibilities, and domain:
+6. For technical skills and responsibilities:
    - Use exact wording or clear references from the description.
 7. For soft skills:
    - You may combine details to infer behavioral or interpersonal traits (e.g., teamwork, adaptability, initiative).
 8. For educational requirements:
    - If multiple fields of study are listed for a single degree level, return them as a list (e.g., ["Computer Science", "Information Systems"]).
-9. Do not fabricate or hallucinate any data not grounded in the job description.
+9. For domain, job level, and employment type:
+   - Infer these fields from the job description if not explicitly stated
+   - Domain refers to the functional area of the job (e.g. IT, HR, Finance, etc.)
+   - Job level may only take on the following values: Entry-Level, Mid-Level, Senior, Executive, Management
+   - Employment type may only take on the following values: Internship, Contract, Part-time, Full-time
+10. An ideal candidate summary must always be provided.
+11. Do not fabricate or hallucinate any data not grounded in the job description.
 
 Output must conform to the expected JSON schema fields exactly.
 """

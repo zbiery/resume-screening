@@ -8,21 +8,39 @@ load_dotenv(override=True)
 
 class AppConfig:
     def __init__(self):
-        config_path = os.getenv("CONFIG_PATH", "config/config.json")
-        environment = os.getenv("ENVIRONMENT", "dev")
-        self.environment = environment
+        self.environment = os.getenv("ENVIRONMENT", "dev")
+        config_path = self._resolve_config_path()
 
-        full_path = Path(config_path)
-        if not full_path.exists():
-            raise FileNotFoundError(f"Config file not found: {full_path.resolve()}")
+        if not config_path.exists():
+            raise FileNotFoundError(f"Config file not found at: {config_path.resolve()}")
 
         with open(config_path, "r") as f:
             self._full_config: Dict[str, Any] = json.load(f)
 
-        if environment not in self._full_config:
-            raise ValueError(f"Environment '{environment}' not found in config.")
+        if self.environment not in self._full_config:
+            raise ValueError(f"Environment '{self.environment}' not found in config.")
 
-        self.config = self._full_config[environment]
+        self.config = self._full_config[self.environment]
+
+    def _resolve_config_path(self) -> Path:
+        # 1. Use CONFIG_PATH env var if set
+        if config_env := os.getenv("CONFIG_PATH"):
+            path = Path(config_env)
+            if path.exists():
+                return path
+
+        # 2. Try relative to the known project structure
+        try:
+            project_root = Path(__file__).resolve().parents[3]
+            path = project_root / "config" / "config.json"
+            if path.exists():
+                return path
+        except IndexError:
+            pass
+
+        # 3. Fallback to working directory
+        fallback = Path.cwd() / "config" / "config.json"
+        return fallback
 
     @property
     def keyvault_name(self) -> str:
@@ -78,6 +96,3 @@ class AppConfig:
 
     def as_dict(self) -> Dict[str, Any]:
         return self.config
-
-
-

@@ -334,7 +334,7 @@ if st.session_state.show_candidate_dialog:
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("💾 Process Files", type="primary", use_container_width=True):
+            if st.button("Save", type="primary", use_container_width=True):
                 save_candidates()
         with col2:
             if st.button("❌ Cancel", use_container_width=True):

@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from azure.identity.aio import DefaultAzureCredential
 from azure.keyvault.secrets.aio import SecretClient
 from langchain_groq import ChatGroq
@@ -7,6 +9,7 @@ import json, jsbeautifier
 from .schema import AIServiceInterface
 from ..common.logger import get_logger
 
+load_dotenv(override=True, dotenv_path='config/.env')
 logger = get_logger(__name__)
 
 class GroqService(AIServiceInterface):
@@ -18,19 +21,23 @@ class GroqService(AIServiceInterface):
         self._credential: DefaultAzureCredential | None = None
 
     async def initialize(self):
-        self._credential = DefaultAzureCredential()
-        secret_client = SecretClient(vault_url=self.keyvault_url, credential=self._credential)
+        if os.environ.get("GROQ_API_KEY"):
+            api_key = os.environ.get("GROQ_API_KEY")
+            logger.debug("API Key retrieved from environment variable.")
+        else: 
+            self._credential = DefaultAzureCredential()
+            secret_client = SecretClient(vault_url=self.keyvault_url, credential=self._credential)
 
-        try:
-            logger.debug("Retrieving Groq API key from Azure Key Vault...")
-            secret = await secret_client.get_secret(self.secret_name)
-            api_key = secret.value
-            logger.debug("Groq API key retrieved.")
-        except Exception as e:
-            logger.error(f"Failed to retrieve Groq API key: {e}")
-            raise
-        finally:
-            await secret_client.close()
+            try:
+                logger.debug("Retrieving Groq API key from Azure Key Vault...")
+                secret = await secret_client.get_secret(self.secret_name)
+                api_key = secret.value
+                logger.debug("Groq API key retrieved.")
+            except Exception as e:
+                logger.error(f"Failed to retrieve Groq API key: {e}")
+                raise
+            finally:
+                await secret_client.close()
 
         self.llm = ChatGroq(api_key=api_key, model=self.model_name, temperature=0.7)  # type: ignore
 

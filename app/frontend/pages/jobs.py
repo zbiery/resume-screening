@@ -304,7 +304,7 @@ if st.session_state.show_job_dialog:
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("💾 Analyze & Save", type="primary", use_container_width=True):
+            if st.button("Save", type="primary", use_container_width=True):
                 if save_job(job_title, job_description):
                     st.rerun()
         with col2:

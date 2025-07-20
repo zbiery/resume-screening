@@ -204,7 +204,7 @@ fn_job_analysis = [
                 },
                 "job_level": {
                     "type": "string",
-                    "description": "Seniority level or rank of the position. Example: 'Internship', 'Entry-level', 'Mid', 'Senior', 'Lead', 'Director'.",
+                    "description": "Seniority level or rank of the position. Example: 'Internship', 'Entry-level', 'Mid-level', 'Senior', 'Management', 'Executive'.",
                     "minLength": 0,
                 },
                 "employment_type": {
@@ -313,7 +313,7 @@ fn_job_analysis = [
                 },
                 "domain": {
                     "type": "string",
-                    "description": "Industry or application domain. Example: 'Finance', 'Healthcare', 'Defense'.",
+                    "description": "Functional area or application domain. Example: 'Finance', 'HR', 'IT'.",
                     "minLength": 0,
                 },
                 "ideal_candidate_summary": {
